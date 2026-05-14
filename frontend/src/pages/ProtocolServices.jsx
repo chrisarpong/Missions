@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ChevronDown } from 'lucide-react';
-
-const services = [
-  { title: 'Issuance, replacement and renewal of Diplomatic Identity Cards', time: 'WITHIN FOUR (4) WORKING DAYS' },
-  { title: 'Exemption on the importation/purchase of official vehicles and goods for Diplomatic Missions and International Organisations', time: 'WITHIN FIVE (5) WORKING DAYS SINCE APPLICATION APPLIES IN THE WHEAT POSTAL SYSTEM' },
-  { title: 'Registration, retrieval and transfer of Diplomatic Vehicle Registration', time: 'WITHIN THREE (3) WORKING DAYS' },
-  { title: 'VAT Refunds', time: 'ON REQUEST' },
-  { title: 'Tax Identification Number (TIN)', time: 'ON REQUEST' },
-  { title: 'Facilitate Permit for re-expatriation, disposal of personal effects, household goods, and vehicle of Diplomats and Diplomatic Missions and International Organisations', time: 'WITHIN TEN (10) WORKING DAYS' },
-  { title: 'Facilitate Diplomatic Overflight/Landing, Naval Clearance', time: 'WITHIN SIX (6) WORKING DAYS' },
-  { title: 'Facilitate the processing of Driver\'s Licence for Diplomats', time: 'WITHIN THREE (3) WORKING DAYS' },
-  { title: 'Facilitate the use of the VIP Lounge by Heads of Mission, International Organisations, and Senior Government Officials', time: 'WITHIN THREE (3) WORKING DAYS - BASED ON APPLY' },
-  { title: 'Facilitate appointments in favor of Heads of Diplomatic Mission and International Organisations', time: 'WITHIN TEN (10) WORKING DAYS' }
-];
+import { Search, ChevronDown, ExternalLink } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 export default function ProtocolServices() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    base44.entities.ServiceInfo.list()
+      .then(data => {
+        // filter for Protocol services if category is used
+        const protocol = data.filter(s => s.category.toLowerCase().includes('protocol'));
+        setServices(protocol.length > 0 ? protocol : data); // fallback to all if none explicitly marked
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = services.filter(s =>
     s.title.toLowerCase().includes(search.toLowerCase())
@@ -44,40 +46,70 @@ export default function ProtocolServices() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by service title, steps, or requirements"
+              placeholder="Search by service title..."
               className="w-full pl-10 pr-4 py-3 border border-gray-200 text-sm focus:outline-none focus:border-[#051A53]"
             />
           </div>
-
         </motion.div>
 
         {/* Services List */}
         <div className="space-y-3 mb-12">
-          {filtered.map((service, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="border border-gray-200 bg-white">
-              <button onClick={() => setExpanded(expanded === i ? null : i)}
-                className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors">
-                <div className="text-left">
-                  <h3 className="font-bold text-gray-900 text-sm">{service.title}</h3>
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 inline-block mt-2">{service.time}</span>
-                </div>
-                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform shrink-0 ${expanded === i ? 'rotate-180' : ''}`} />
-              </button>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-4 border-gray-200 border-t-[#051A53] rounded-full animate-spin mx-auto"></div>
+            </div>
+          ) : filtered.length > 0 ? (
+            filtered.map((service, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="border border-gray-200 bg-white">
+                <button onClick={() => setExpanded(expanded === i ? null : i)}
+                  className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors">
+                  <div className="text-left">
+                    <h3 className="font-bold text-gray-900 text-sm">{service.title}</h3>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {service.processing_time && (
+                        <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 uppercase">{service.processing_time}</span>
+                      )}
+                      {service.fee && (
+                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2.5 py-1 uppercase">{service.fee}</span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform shrink-0 ${expanded === i ? 'rotate-180' : ''}`} />
+                </button>
 
-              {expanded === i && (
-                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}
-                  className="border-t border-gray-200 bg-gray-50 p-5">
-                  <p className="text-sm text-gray-700">
-                    For details on this service, including requirements and application procedures, please contact the Protocol Unit.
-                  </p>
-                </motion.div>
-              )}
-            </motion.div>
-          ))}
+                {expanded === i && (
+                  <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}
+                    className="border-t border-gray-200 bg-gray-50 p-5 space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1">Description</h4>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{service.description || 'For details on this service, including requirements and application procedures, please contact the Protocol Unit.'}</p>
+                    </div>
+                    {service.requirements && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">Requirements</h4>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{service.requirements}</p>
+                      </div>
+                    )}
+                    {service.link && (
+                      <div className="pt-2">
+                        <a href={service.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[#051A53] text-sm font-semibold hover:underline">
+                          More Information <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <p className="font-medium">No services found matching your criteria.</p>
+            </div>
+          )}
         </div>
 
         {/* Forms Section */}

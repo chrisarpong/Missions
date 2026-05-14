@@ -8,7 +8,7 @@ export default function MediaPicker({ onSelect, onClose }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Media.list('-created_date', 100)
+    base44.entities.Media.list('-uploaded_at')
       .then(setMedia)
       .finally(() => setLoading(false));
   }, []);
@@ -56,7 +56,7 @@ export default function MediaPicker({ onSelect, onClose }) {
                   className="relative h-32 bg-gray-100 overflow-hidden border-2 border-transparent hover:border-[#051A53] transition-all group"
                 >
                   <img
-                    src={item.file_url}
+                    src={item.file}
                     alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />

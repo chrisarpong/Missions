@@ -21,13 +21,10 @@ export default function EventModal({ event, onSave, onClose }) {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handlePosterUpload = async (e) => {
+  const handlePosterUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    set('poster_url', file_url);
-    setUploading(false);
+    set('poster', file);
   };
 
   return (
@@ -65,7 +62,7 @@ export default function EventModal({ event, onSave, onClose }) {
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Time</label>
-              <input type="time" value={form.time} onChange={e => set('time', e.target.value)}
+              <input type="time" value={form.time || ''} onChange={e => set('time', e.target.value)}
                 className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" />
             </div>
           </div>
@@ -76,7 +73,7 @@ export default function EventModal({ event, onSave, onClose }) {
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Host / Organizer</label>
-            <input value={form.host} onChange={e => set('host', e.target.value)}
+            <input value={form.host || ''} onChange={e => set('host', e.target.value)}
               className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" />
           </div>
           <div>
@@ -87,22 +84,37 @@ export default function EventModal({ event, onSave, onClose }) {
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Poster (Landscape or Portrait)</label>
             <div className="relative">
-              {form.poster_url && (
+              {form.poster_url && !form.poster && (
                 <div className="mb-3 w-full h-40 border border-gray-200 overflow-hidden">
                   <img src={form.poster_url} alt="Event poster" className="w-full h-full object-cover" />
                 </div>
               )}
+              {form.poster && (
+                 <p className="text-sm text-green-600 mb-2">New file selected: {form.poster.name}</p>
+              )}
               <label className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#051A53] transition-colors">
                 <Upload className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">{uploading ? 'Uploading...' : 'Choose poster image'}</span>
-                <input type="file" accept="image/*" onChange={handlePosterUpload} disabled={uploading} className="hidden" />
+                <span className="text-sm text-gray-600">Choose poster image</span>
+                <input type="file" accept="image/*" onChange={handlePosterUpload} className="hidden" />
               </label>
             </div>
           </div>
         </div>
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
           <button onClick={onClose} className="px-4 py-2.5 border border-gray-200 text-sm text-gray-600 hover:bg-gray-100">Cancel</button>
-          <button onClick={() => onSave(form)} className="px-6 py-2.5 bg-[#051A53] text-white text-sm font-medium hover:bg-[#051A53]/90">
+          <button onClick={() => {
+            const formData = new FormData();
+            Object.keys(form).forEach(key => {
+              if (key === 'poster' && form.poster instanceof File) {
+                formData.append('poster', form.poster);
+              } else if (key !== 'poster' && key !== 'poster_url') {
+                if (form[key] !== null && form[key] !== undefined && form[key] !== '') {
+                  formData.append(key, form[key]);
+                }
+              }
+            });
+            onSave(formData);
+          }} className="px-6 py-2.5 bg-[#051A53] text-white text-sm font-medium hover:bg-[#051A53]/90">
             {event ? 'Save Changes' : 'Create Event'}
           </button>
         </div>

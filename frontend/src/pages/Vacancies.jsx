@@ -1,115 +1,37 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
-
-const vacanciesData = [
-  {
-    title: 'Cloud Telecoms and Security',
-    organisation: 'World Meteorological Organization (WMO)',
-    location: 'Geneva, Switzerland',
-    closingDate: '27 Feb 2026',
-    status: 'Applications Closed',
-    level: 'P-2',
-    type: 'Telecom',
-    roleDesc: 'Duty Station: Duty station: Geneva.',
-    keyDetails: [
-      'Department: World Meteorological Organization (WMO)',
-      'Location: Geneva, Switzerland',
-      'Employment Type: P-2',
-      'Status: Applications Closed'
-    ]
-  },
-  {
-    title: 'Associate Project Officer',
-    organisation: 'International Criminal Court (ICC)',
-    location: 'The Hague, Netherlands',
-    closingDate: '5 Mar 2026',
-    status: 'Applications Closed',
-    level: 'P-2',
-    type: 'Project',
-    roleDesc: 'Ref/Service No. 24159',
-    keyDetails: [
-      'Department: International Criminal Court (ICC)',
-      'Location: The Hague, Netherlands',
-      'Employment Type: P-2',
-      'Status: Applications Closed'
-    ]
-  },
-  {
-    title: 'Associate Private Sector Engagement Officer',
-    organisation: 'World Meteorological Organization (WMO)',
-    location: 'Geneva, Switzerland',
-    closingDate: '5 Mar 2026',
-    status: 'Applications Closed',
-    level: 'P-2',
-    type: 'Engagement',
-    roleDesc: 'Vacancy No. 2418, Duty station: Geneva.',
-    keyDetails: [
-      'Department: World Meteorological Organization (WMO)',
-      'Location: Geneva, Switzerland',
-      'Employment Type: P-2',
-      'Status: Applications Closed'
-    ]
-  },
-  {
-    title: 'Private Sector Engagement Officer',
-    organisation: 'World Meteorological Organization (WMO)',
-    location: 'Geneva, Switzerland',
-    closingDate: '1 Mar 2026',
-    status: 'Applications Closed',
-    level: 'P-1',
-    type: 'Engagement',
-    roleDesc: 'Vacancy No. 2417, Duty station: Geneva.',
-    keyDetails: [
-      'Department: World Meteorological Organization (WMO)',
-      'Location: Geneva, Switzerland',
-      'Employment Type: P-1',
-      'Status: Applications Closed'
-    ]
-  },
-  {
-    title: 'Head of Facilities Management and Common Services',
-    organisation: 'World Meteorological Organization (WMO)',
-    location: 'Geneva, Switzerland',
-    closingDate: '1 Mar 2026',
-    status: 'Applications Closed',
-    level: 'P-2',
-    type: 'Management',
-    roleDesc: 'Vacancy No. 1438, Duty station: Geneva.',
-    keyDetails: [
-      'Department: World Meteorological Organization (WMO)',
-      'Location: Geneva, Switzerland',
-      'Employment Type: P-2',
-      'Status: Applications Closed'
-    ]
-  }
-];
+import { base44 } from '@/api/base44Client';
 
 export default function Vacancies() {
+  const [vacanciesData, setVacanciesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
   const [orgFilter, setOrgFilter] = useState('All');
   const [locationFilter, setLocationFilter] = useState('All');
-  const [levelFilter, setLevelFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const organisations = ['All', ...new Set(vacanciesData.map(v => v.organisation))];
+  useEffect(() => {
+    base44.entities.Vacancy.filter({ is_active: true })
+      .then(setVacanciesData)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const organisations = ['All', ...new Set(vacanciesData.map(v => v.department))];
   const locations = ['All', ...new Set(vacanciesData.map(v => v.location))];
-  const levels = ['All', 'P-1', 'P-2'];
-  const statuses = ['All', 'Applications Closed', 'Open'];
 
   const filtered = useMemo(() => {
     return vacanciesData.filter(v => {
       const searchMatch = !search || 
         v.title.toLowerCase().includes(search.toLowerCase()) ||
-        v.organisation.toLowerCase().includes(search.toLowerCase());
-      const statusMatch = statusFilter === 'All' || v.status === statusFilter;
-      const orgMatch = orgFilter === 'All' || v.organisation === orgFilter;
+        v.department.toLowerCase().includes(search.toLowerCase());
+      const orgMatch = orgFilter === 'All' || v.department === orgFilter;
       const locationMatch = locationFilter === 'All' || v.location === locationFilter;
-      const levelMatch = levelFilter === 'All' || v.level === levelFilter;
-      return searchMatch && statusMatch && orgMatch && locationMatch && levelMatch;
+      return searchMatch && orgMatch && locationMatch;
     });
-  }, [search, statusFilter, orgFilter, locationFilter, levelFilter]);
+  }, [vacanciesData, search, orgFilter, locationFilter]);
 
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -117,10 +39,8 @@ export default function Vacancies() {
 
   const handleClear = () => {
     setSearch('');
-    setStatusFilter('All');
     setOrgFilter('All');
     setLocationFilter('All');
-    setLevelFilter('All');
     setCurrentPage(1);
   };
 
@@ -164,17 +84,10 @@ export default function Vacancies() {
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Search by title, organisation..."
+                  placeholder="Search by title, department..."
                   className="w-full pl-9 pr-3 py-2.5 border border-gray-200 text-sm focus:outline-none focus:border-[#051A53]"
                 />
               </div>
-              <select
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="px-3 py-2.5 border border-gray-200 text-sm focus:outline-none focus:border-[#051A53] appearance-none bg-white cursor-pointer"
-              >
-                {statuses.map(s => <option key={s}>{s}</option>)}
-              </select>
               <select
                 value={orgFilter}
                 onChange={e => setOrgFilter(e.target.value)}
@@ -189,13 +102,6 @@ export default function Vacancies() {
               >
                 {locations.map(l => <option key={l}>{l}</option>)}
               </select>
-              <select
-                value={levelFilter}
-                onChange={e => setLevelFilter(e.target.value)}
-                className="px-3 py-2.5 border border-gray-200 text-sm focus:outline-none focus:border-[#051A53] appearance-none bg-white cursor-pointer"
-              >
-                {levels.map(l => <option key={l}>{l}</option>)}
-              </select>
               <button
                 onClick={handleClear}
                 className="px-4 py-2.5 border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
@@ -208,7 +114,11 @@ export default function Vacancies() {
 
         {/* Vacancies List */}
         <div className="space-y-6">
-          {paginatedVacancies.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-4 border-gray-200 border-t-[#051A53] rounded-full animate-spin mx-auto"></div>
+            </div>
+          ) : paginatedVacancies.length > 0 ? (
             paginatedVacancies.map((vacancy, i) => (
               <motion.div key={i}
                 initial={{ opacity: 0, y: 10 }}
@@ -219,29 +129,34 @@ export default function Vacancies() {
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">{vacancy.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{vacancy.organisation}</p>
+                      <p className="text-sm text-gray-600 mt-1">{vacancy.department}</p>
                     </div>
+                    {vacancy.apply_link && (
+                      <a href={vacancy.apply_link} target="_blank" rel="noreferrer" className="px-4 py-2 bg-[#051A53] text-white text-sm hover:bg-[#051A53]/90">
+                        Apply Now
+                      </a>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="text-gray-700">Closing date: {vacancy.closingDate}</span>
-                    <span className="bg-red-100 text-red-700 px-2.5 py-0.5 font-medium">{vacancy.status}</span>
-                    <span className="bg-gray-100 text-gray-700 px-2.5 py-0.5">{vacancy.level}</span>
+                    <span className="text-gray-700">Closing date: {vacancy.deadline}</span>
+                    <span className="bg-green-100 text-green-700 px-2.5 py-0.5 font-medium">Open</span>
                   </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-6 px-6 py-5">
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm mb-2">Role Description</h4>
-                    <p className="text-sm text-gray-700">{vacancy.roleDesc}</p>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacancy.description}</p>
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm mb-2">Key Details</h4>
                     <ul className="space-y-1">
-                      {vacancy.keyDetails.map((detail, j) => (
-                        <li key={j} className="text-sm text-gray-700 flex gap-2">
-                          <span className="text-gray-400">•</span> {detail}
-                        </li>
-                      ))}
+                      <li className="text-sm text-gray-700 flex gap-2">
+                        <span className="text-gray-400">•</span> Department: {vacancy.department}
+                      </li>
+                      <li className="text-sm text-gray-700 flex gap-2">
+                        <span className="text-gray-400">•</span> Location: {vacancy.location}
+                      </li>
                     </ul>
                   </div>
                 </div>

@@ -2,36 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarDays, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const MOCK_EVENTS = [
-  {
-    id: 'e1',
-    type: 'Cultural',
-    title: 'Ghana Independence Day Celebration 2026',
-    date: '2026-03-06',
-    location: 'Lansdowne Park, Ottawa',
-    poster_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80'
-  },
-  {
-    id: 'e2',
-    type: 'Diplomatic',
-    title: 'Bilateral Trade Forum: Ghana & Canada',
-    date: '2026-04-15',
-    location: 'Westin Hotel, Ottawa',
-    poster_url: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&q=80'
-  },
-  {
-    id: 'e3',
-    type: 'Community',
-    title: 'Consular Outreach Programme - Toronto',
-    date: '2026-05-20',
-    location: 'Ghanaian Presbyterian Church, Toronto',
-    poster_url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&q=80'
-  }
-];
+import { base44 } from '@/api/base44Client';
 
 export default function UpcomingEventsHome() {
-  const [events, setEvents] = useState(MOCK_EVENTS);
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    base44.entities.DiploEvent.list('-date', 3)
+      .then(data => {
+        // limit to first 3 items in case pagination is off
+        setEvents(data.slice ? data.slice(0, 3) : []);
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <section className="bg-muted/50 py-20">
@@ -91,7 +74,7 @@ export default function UpcomingEventsHome() {
         {/* CTA */}
         <div className="text-center mt-8">
           <Link
-            to="/news"
+            to="/events"
             className="px-6 py-2.5 border-2 border-[#051A53] text-[#051A53] text-sm font-medium hover:bg-[#051A53] hover:text-white transition-all duration-300 inline-flex items-center gap-2 group"
           >
             View all events

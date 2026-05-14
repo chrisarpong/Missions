@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 
 export default function HeroSlideModal({ slide, onSave, onClose }) {
   const [form, setForm] = useState(slide || {
-    title: '', description: '', date_label: '', image_url: '', cta_text: 'Learn More', cta_url: '', order: 0, active: true
+    title: '', subtitle: '', date_label: '', image_url: '', cta_text: 'Learn More', cta_url: '', order: 0, active: true
   });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -27,14 +27,15 @@ export default function HeroSlideModal({ slide, onSave, onClose }) {
               className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" placeholder="e.g. March 26, 2026" />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Description</label>
-            <textarea value={form.description} onChange={e => set('description', e.target.value)} rows={3}
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Subtitle</label>
+            <textarea value={form.subtitle} onChange={e => set('subtitle', e.target.value)} rows={3}
               className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53] resize-none" placeholder="Short description..." />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Image URL</label>
-            <input value={form.image_url} onChange={e => set('image_url', e.target.value)}
-              className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" placeholder="https://..." />
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Background Image</label>
+            <input type="file" accept="image/*" onChange={e => set('image', e.target.files[0])}
+              className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" />
+            {form.image_url && <p className="text-xs text-gray-500 mt-1">Current: {form.image_url}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -43,10 +44,15 @@ export default function HeroSlideModal({ slide, onSave, onClose }) {
                 className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Order</label>
-              <input type="number" value={form.order} onChange={e => set('order', Number(e.target.value))}
-                className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" min={0} />
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">CTA URL</label>
+              <input value={form.cta_url || ''} onChange={e => set('cta_url', e.target.value)}
+                className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" placeholder="https://..." />
             </div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Order</label>
+            <input type="number" value={form.order} onChange={e => set('order', Number(e.target.value))}
+              className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" min={0} />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={!!form.active} onChange={e => set('active', e.target.checked)} className="w-4 h-4" />
@@ -55,7 +61,19 @@ export default function HeroSlideModal({ slide, onSave, onClose }) {
         </div>
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
           <button onClick={onClose} className="px-4 py-2 text-sm border border-gray-200 text-gray-600 hover:bg-gray-50">Cancel</button>
-          <button onClick={() => onSave(form)} className="px-4 py-2 text-sm bg-[#051A53] text-white hover:bg-[#051A53]/90">
+          <button onClick={() => {
+            const formData = new FormData();
+            Object.keys(form).forEach(key => {
+              if (key === 'image' && form.image instanceof File) {
+                formData.append('image', form.image);
+              } else if (key !== 'image' && key !== 'image_url') {
+                if (form[key] !== null && form[key] !== undefined) {
+                  formData.append(key, form[key]);
+                }
+              }
+            });
+            onSave(formData);
+          }} className="px-4 py-2 text-sm bg-[#051A53] text-white hover:bg-[#051A53]/90">
             {slide ? 'Save Changes' : 'Create Slide'}
           </button>
         </div>

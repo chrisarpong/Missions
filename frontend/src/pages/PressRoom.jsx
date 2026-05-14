@@ -14,29 +14,7 @@ const CATEGORY_CONFIG = {
 
 const CATEGORIES = ['All', 'Press Release', 'Statement', 'News', 'Speech', 'Media Advisory', 'Communiqué'];
 
-const STATIC_ARTICLES = [
-  {
-    id: 's1', title: 'Ghana Leads UN Resolution on Reparatory Justice', category: 'Press Release',
-    summary: 'Ghana successfully leads a landmark UN General Assembly resolution, declaring the Trafficking of Enslaved Africans as a matter of global importance and reparatory justice a priority.',
-    published_date: '2026-03-26', featured: true,
-    image: 'https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/fa12efd2f_generated_6e29a002.png',
-    author: 'Ministry of Foreign Affairs',
-  },
-  {
-    id: 's2', title: 'Minister Ablakwa Concludes Bilateral Talks in Washington D.C.', category: 'Statement',
-    summary: 'The Minister for Foreign Affairs met with senior U.S. State Department officials to strengthen the Ghana-U.S. partnership on trade, security and diaspora affairs.',
-    published_date: '2026-03-17', featured: false,
-    image: 'https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/f6e3faa56_generated_7f8f2df7.png',
-    author: 'Press & Public Affairs Directorate',
-  },
-  {
-    id: 's3', title: 'Ghana and Colombia Sign Historic Diplomatic Agreement', category: 'News',
-    summary: 'A comprehensive bilateral agreement was signed in Accra, opening new avenues for trade, cultural exchange, and mutual cooperation.',
-    published_date: '2026-03-13', featured: false,
-    image: 'https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/4ac40a7f8_generated_51267251.png',
-    author: 'Ministry of Foreign Affairs',
-  },
-];
+
 
 function ArticleModal({ article, onClose }) {
   return (
@@ -82,14 +60,13 @@ export default function PressRoom() {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => setTicker(t => (t + 1) % STATIC_ARTICLES.length), 4000);
-    return () => clearInterval(interval);
-  }, []);
+    if (dbArticles.length > 0) {
+      const interval = setInterval(() => setTicker(t => (t + 1) % dbArticles.length), 4000);
+      return () => clearInterval(interval);
+    }
+  }, [dbArticles]);
 
-  const allArticles = [
-    ...dbArticles.map(a => ({ ...a, image: a.image_url })),
-    ...STATIC_ARTICLES
-  ];
+  const allArticles = dbArticles.map(a => ({ ...a, image: a.image_url }));
 
   const featured = allArticles.find(a => a.featured) || allArticles[0];
   const filtered = allArticles.filter(a => {
@@ -112,10 +89,12 @@ export default function PressRoom() {
           <div className="max-w-7xl mx-auto flex items-center gap-4">
             <span className="shrink-0 text-xs font-black uppercase tracking-widest px-2 py-0.5 bg-[#051A53] text-yellow-400">LATEST</span>
             <AnimatePresence mode="wait">
-              <motion.span key={ticker} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                className="text-xs font-semibold truncate">
-                {STATIC_ARTICLES[ticker].title}
-              </motion.span>
+              {dbArticles.length > 0 && (
+                <motion.span key={ticker} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                  className="text-xs font-semibold truncate">
+                  {dbArticles[ticker]?.title}
+                </motion.span>
+              )}
             </AnimatePresence>
           </div>
         </div>

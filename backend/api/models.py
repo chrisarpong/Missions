@@ -123,3 +123,38 @@ class Media(models.Model):
 
     def __str__(self):
         return self.name
+
+class Vacancy(models.Model):
+    title = models.CharField(max_length=255)
+    department = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    description = models.TextField()
+    deadline = models.DateField()
+    apply_link = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+class Scholarship(models.Model):
+    title = models.CharField(max_length=255)
+    provider = models.CharField(max_length=255)
+    description = models.TextField()
+    deadline = models.DateField()
+    link = models.URLField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+class ServiceInfo(models.Model):
+    title = models.CharField(max_length=255)
+    category = models.CharField(max_length=100)
+    description = models.TextField()
+    requirements = models.TextField(blank=True)
+    processing_time = models.CharField(max_length=100, blank=True)
+    fee = models.CharField(max_length=100, blank=True)
+    link = models.URLField(blank=True)
+
+    def __str__(self):
+        return self.title

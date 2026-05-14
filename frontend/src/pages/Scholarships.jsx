@@ -1,53 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, ExternalLink } from 'lucide-react';
-
-const scholarships = [
-  {
-    country: 'INDIA',
-    countryTag: 'ITEC',
-    course: 'Indian Technical and Economic Cooperation',
-    deadline: 'Open / Not specified',
-    dates: 'To be announced',
-    link: '#'
-  },
-  {
-    country: 'SINGAPORE',
-    countryTag: 'SG',
-    course: 'Healthcare Management',
-    deadline: '2nd January, 2026',
-    dates: '2nd - 6th March, 2026',
-    link: '#'
-  },
-  {
-    country: 'SINGAPORE',
-    countryTag: 'SG',
-    course: 'Gender Equality in an Inclusive Society',
-    deadline: '5th December, 2025',
-    dates: '2nd - 6th February, 2026',
-    link: '#'
-  },
-  {
-    country: 'BRAZIL',
-    countryTag: 'BR',
-    course: 'Brazilian Programme for Exchange Students - Postgraduate Level - PEC-PG',
-    deadline: '29th September, 2025 (Master\'s & Doctorate), 30th December, 2025 (Sandwich Doctorate)',
-    dates: '15th August 2025 (vacancies list), Applications Aug-Sep (MARS), Oct-Dec (Sandwich)',
-    link: '#'
-  }
-];
+import { base44 } from '@/api/base44Client';
 
 export default function Scholarships() {
+  const [scholarships, setScholarships] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All countries');
+  const [filter, setFilter] = useState('All providers');
+
+  useEffect(() => {
+    base44.entities.Scholarship.filter({ is_active: true })
+      .then(setScholarships)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = scholarships.filter(s =>
-    (filter === 'All countries' || s.country === filter) &&
-    (s.course.toLowerCase().includes(search.toLowerCase()) ||
-     s.country.toLowerCase().includes(search.toLowerCase()))
+    (filter === 'All providers' || s.provider === filter) &&
+    (s.title.toLowerCase().includes(search.toLowerCase()) ||
+     s.provider.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const countries = ['All countries', ...new Set(scholarships.map(s => s.country))];
+  const providers = ['All providers', ...new Set(scholarships.map(s => s.provider))];
 
   return (
     <div className="min-h-screen bg-background">
@@ -72,7 +48,7 @@ export default function Scholarships() {
                 Explore current scholarship opportunities from partner countries and institutions through official application channels.
               </p>
               <p className="text-sm text-gray-700 mb-4">
-                Use the filters below to quickly find programmes by country, course area, or application window.
+                Use the filters below to quickly find programmes by provider, course area, or application window.
               </p>
 
               <div className="border-t border-gray-200 pt-6 mt-6">
@@ -99,7 +75,7 @@ export default function Scholarships() {
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Search by country, course name, deadline, or dates"
+                  placeholder="Search by provider or course name"
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-200 text-sm focus:outline-none focus:border-[#051A53]"
                 />
               </div>
@@ -110,8 +86,8 @@ export default function Scholarships() {
                   onChange={e => setFilter(e.target.value)}
                   className="flex-1 px-3 py-2.5 border border-gray-200 text-sm focus:outline-none focus:border-[#051A53] appearance-none bg-white cursor-pointer"
                 >
-                  {countries.map(c => (
-                    <option key={c}>{c}</option>
+                  {providers.map(p => (
+                    <option key={p}>{p}</option>
                   ))}
                 </select>
                 <button className="px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors">
@@ -126,30 +102,38 @@ export default function Scholarships() {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Country</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Provider</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Course Name</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Deadline for Applications</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Dates</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Deadline</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Description</th>
                       <th className="text-center px-4 py-3 font-semibold text-gray-700 uppercase tracking-wide text-xs">Link</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {filtered.length > 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
+                          <div className="w-6 h-6 border-2 border-gray-200 border-t-[#051A53] rounded-full animate-spin mx-auto"></div>
+                        </td>
+                      </tr>
+                    ) : filtered.length > 0 ? (
                       filtered.map((s, i) => (
                         <tr key={i} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-4">
-                            <span className="text-xs font-bold text-[#051A53] bg-red-100 px-2.5 py-1 inline-block">
-                              {s.countryTag}
+                            <span className="text-xs font-bold text-[#051A53] bg-blue-100 px-2.5 py-1 inline-block uppercase">
+                              {s.provider}
                             </span>
                           </td>
-                          <td className="px-4 py-4 font-medium text-gray-900">{s.course}</td>
+                          <td className="px-4 py-4 font-medium text-gray-900">{s.title}</td>
                           <td className="px-4 py-4 text-gray-600">{s.deadline}</td>
-                          <td className="px-4 py-4 text-gray-600">{s.dates}</td>
+                          <td className="px-4 py-4 text-gray-600 text-xs">{s.description}</td>
                           <td className="px-4 py-4 text-center">
-                            <a href={s.link}
-                              className="inline-flex items-center gap-1 px-4 py-2 bg-[#051A53] text-white text-xs font-bold uppercase hover:bg-[#051A53]/90 transition-colors">
-                              Apply <ExternalLink className="w-3 h-3" />
-                            </a>
+                            {s.link && (
+                              <a href={s.link} target="_blank" rel="noreferrer"
+                                className="inline-flex items-center gap-1 px-4 py-2 bg-[#051A53] text-white text-xs font-bold uppercase hover:bg-[#051A53]/90 transition-colors">
+                                Apply <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
                           </td>
                         </tr>
                       ))

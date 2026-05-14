@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, Route, Routes } from 'react-router-dom';
-import { Newspaper, Radio, Monitor, AlertCircle, BarChart2, Menu, ChevronRight, Settings, Users, CheckSquare, MessageSquare, Image } from 'lucide-react';
+import { Newspaper, Radio, Monitor, AlertCircle, BarChart2, Menu, ChevronRight, Settings, Users, CheckSquare, MessageSquare, Image, Briefcase, GraduationCap, FileText } from 'lucide-react';
 import CRMDashboard from './CRMDashboard';
 import CRMNews from './CRMNews';
 import CRMPopups from './CRMPopups';
@@ -10,6 +10,9 @@ import CRMContacts from './CRMContacts';
 import CRMTasks from './CRMTasks';
 import CRMInteractions from './CRMInteractions';
 import CRMMedia from './CRMMedia';
+import CRMVacancies from './CRMVacancies';
+import CRMScholarships from './CRMScholarships';
+import CRMServices from './CRMServices';
 
 const navItems = [
   { label: 'Dashboard', path: '/crm', icon: BarChart2 },
@@ -18,6 +21,9 @@ const navItems = [
   { label: 'Hero Slides', path: '/crm/hero', icon: Monitor },
   { label: 'Popups', path: '/crm/popups', icon: AlertCircle },
   { label: 'Events', path: '/crm/events', icon: Radio },
+  { label: 'Vacancies', path: '/crm/vacancies', icon: Briefcase },
+  { label: 'Scholarships', path: '/crm/scholarships', icon: GraduationCap },
+  { label: 'Services', path: '/crm/services', icon: FileText },
   { label: 'Contacts', path: '/crm/contacts', icon: Users },
   { label: 'Tasks', path: '/crm/tasks', icon: CheckSquare },
   { label: 'Interactions', path: '/crm/interactions', icon: MessageSquare },
@@ -43,7 +49,7 @@ export default function CRMLayout() {
           </div>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map(({ label, path, icon: Icon }) => {
             const active = path === '/crm' ? location.pathname === '/crm' : location.pathname.startsWith(path);
             return (
@@ -85,6 +91,9 @@ export default function CRMLayout() {
             <Route path="hero" element={<CRMHeroSlides />} />
             <Route path="events" element={<CRMEvents />} />
             <Route path="media" element={<CRMMedia />} />
+            <Route path="vacancies" element={<CRMVacancies />} />
+            <Route path="scholarships" element={<CRMScholarships />} />
+            <Route path="services" element={<CRMServices />} />
             <Route path="contacts" element={<CRMContacts />} />
             <Route path="tasks" element={<CRMTasks />} />
             <Route path="interactions" element={<CRMInteractions />} />

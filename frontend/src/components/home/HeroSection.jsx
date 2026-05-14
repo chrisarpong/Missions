@@ -1,31 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Calendar } from 'lucide-react';
-
-const MOCK_SLIDES = [
-  {
-    date: 'March 26, 2026',
-    title: 'History Made at the United Nations',
-    description: 'The United Nations General Assembly has adopted resolution A/RES/81, declaring the Trafficking of Enslaved Africans and Reparatory Justice Movement as the Greatest Ci...',
-    image: 'https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/8e771d8f4_generated_8da19969.png',
-  },
-  {
-    date: 'March 15, 2026',
-    title: 'Ghana Strengthens Bilateral Ties with Colombia',
-    description: 'A historic diplomatic agreement was signed between Ghana and Colombia, opening new avenues for trade, cultural exchange, and mutual cooperation between the two nations.',
-    image: 'https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/f6e3faa56_generated_7f8f2df7.png',
-  },
-  {
-    date: 'February 28, 2026',
-    title: 'Diplomatic Summit on African Trade',
-    description: 'Ghana hosted a landmark summit bringing together African nations to discuss the future of intra-continental trade and the implementation of the AfCFTA agreement.',
-    image: 'https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/fa12efd2f_generated_6e29a002.png',
-  },
-];
+import { base44 } from '@/api/base44Client';
 
 export default function HeroSection() {
-  const [slides, setSlides] = useState(MOCK_SLIDES);
+  const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    base44.entities.HeroSlide.filter({ active: true })
+      .then(data => {
+        setSlides(data);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (slides.length === 0) return;
@@ -52,7 +40,7 @@ export default function HeroSection() {
           className="absolute inset-0"
         >
           <img
-            src={slide.image}
+            src={slide.image_url}
             alt=""
             className="w-full h-full object-cover"
           />
@@ -71,13 +59,15 @@ export default function HeroSection() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-px bg-accent" />
-                <span className="text-accent text-xs font-medium uppercase tracking-widest flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {slide.date}
-                </span>
-              </div>
+              {slide.date_label && (
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-px bg-accent" />
+                  <span className="text-accent text-xs font-medium uppercase tracking-widest flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {slide.date_label}
+                  </span>
+                </div>
+              )}
               <h1 className="font-heading text-primary-foreground text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-5">
                 Welcome to the High Commission of Ghana in Ottawa, Canada
               </h1>
@@ -85,14 +75,15 @@ export default function HeroSection() {
                 {slide.title}
               </h2>
               <p className="text-primary-foreground/70 text-base sm:text-lg leading-relaxed mb-8 max-w-lg">
-                {slide.description}
+                {slide.subtitle}
               </p>
-              <button
+              <a
+                href={slide.cta_url || '#'}
                 className="px-6 py-2.5 border-2 border-white text-white text-sm font-medium hover:bg-white hover:text-[#051A53] transition-all duration-300 inline-flex items-center gap-2 group"
               >
-                Learn More
+                {slide.cta_text || 'Learn More'}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+              </a>
             </motion.div>
           </AnimatePresence>
           <div className="mt-8 inline-block bg-black/35 border border-white/20 px-4 py-3 backdrop-blur-sm">

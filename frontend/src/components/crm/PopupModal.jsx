@@ -56,13 +56,14 @@ export default function PopupModal({ popup, onSave, onClose }) {
             </div>
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Image URL (optional)</label>
-            <input value={form.image_url} onChange={e => set('image_url', e.target.value)}
-              className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" placeholder="https://..." />
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Image (optional)</label>
+            <input type="file" accept="image/*" onChange={e => set('image', e.target.files[0])}
+              className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" />
+            {form.image_url && <p className="text-xs text-gray-500 mt-1">Current: {form.image_url}</p>}
           </div>
           <div>
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Expires Date</label>
-            <input type="date" value={form.expires_date} onChange={e => set('expires_date', e.target.value)}
+            <input type="date" value={form.expires_date || ''} onChange={e => set('expires_date', e.target.value)}
               className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-[#051A53]" />
           </div>
           <div className="space-y-2">
@@ -78,7 +79,19 @@ export default function PopupModal({ popup, onSave, onClose }) {
         </div>
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
           <button onClick={onClose} className="px-4 py-2 text-sm border border-gray-200 text-gray-600 hover:bg-gray-50">Cancel</button>
-          <button onClick={() => onSave(form)} className="px-4 py-2 text-sm bg-[#051A53] text-white hover:bg-[#051A53]/90">
+          <button onClick={() => {
+            const formData = new FormData();
+            Object.keys(form).forEach(key => {
+              if (key === 'image' && form.image instanceof File) {
+                formData.append('image', form.image);
+              } else if (key !== 'image' && key !== 'image_url') {
+                if (form[key] !== null && form[key] !== undefined && form[key] !== '') {
+                  formData.append(key, form[key]);
+                }
+              }
+            });
+            onSave(formData);
+          }} className="px-4 py-2 text-sm bg-[#051A53] text-white hover:bg-[#051A53]/90">
             {popup ? 'Save Changes' : 'Create Popup'}
           </button>
         </div>

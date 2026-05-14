@@ -11,7 +11,7 @@ export default function CRMMedia() {
   const [copied, setCopied] = useState(null);
 
   useEffect(() => {
-    base44.entities.Media.list('-created_date', 100)
+    base44.entities.Media.list('-uploaded_at')
       .then(setMedia)
       .finally(() => setLoading(false));
   }, []);
@@ -23,16 +23,14 @@ export default function CRMMedia() {
     setUploading(true);
     try {
       for (const file of files) {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        await base44.entities.Media.create({
-          name: file.name,
-          file_url,
-          type: file.type.startsWith('image') ? 'image' : 'document',
-          size: file.size,
-          tags: [],
-        });
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', file.name);
+        formData.append('type', file.type.startsWith('image') ? 'image' : 'document');
+        formData.append('size', file.size.toString());
+        await base44.entities.Media.create(formData);
       }
-      const updated = await base44.entities.Media.list('-created_date', 100);
+      const updated = await base44.entities.Media.list('-uploaded_at');
       setMedia(updated);
     } finally {
       setUploading(false);
@@ -141,13 +139,13 @@ export default function CRMMedia() {
               {/* Preview */}
               <div className="relative h-40 bg-gray-100 overflow-hidden">
                 <img
-                  src={item.file_url}
+                  src={item.file}
                   alt={item.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                   <button
-                    onClick={() => copyUrl(item.file_url)}
+                    onClick={() => copyUrl(item.file)}
                     className="p-2 bg-white/90 hover:bg-white transition-colors"
                     title="Copy URL"
                   >
@@ -161,7 +159,7 @@ export default function CRMMedia() {
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-                {copied === item.file_url && (
+                {copied === item.file && (
                   <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center text-white text-xs font-medium">
                     Copied!
                   </div>

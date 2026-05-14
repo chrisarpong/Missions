@@ -16,7 +16,7 @@ export default function Footer({ missionInfo }) {
         {/* Logo */}
         <div className="mb-12">
           <img
-            src="https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/0d720b5a0_MFALogo6.png"
+            src="/ghana-crest.png"
             alt="Ministry of Foreign Affairs - Republic of Ghana"
             className="h-20 w-auto"
           />

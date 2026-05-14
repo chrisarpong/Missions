@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import NewsArticle, Contact, DiploEvent, HeroSlide, SitePopup, DiploTask, Interaction, Media
+from .models import NewsArticle, Contact, DiploEvent, HeroSlide, SitePopup, DiploTask, Interaction, Media, Vacancy, Scholarship, ServiceInfo
 
 class NewsArticleSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
@@ -67,4 +67,19 @@ class InteractionSerializer(serializers.ModelSerializer):
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
+        fields = '__all__'
+
+class VacancySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vacancy
+        fields = '__all__'
+
+class ScholarshipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scholarship
+        fields = '__all__'
+
+class ServiceInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceInfo
         fields = '__all__'

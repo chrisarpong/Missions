@@ -112,7 +112,7 @@ export default function Navbar({ bannerHeight = 0, missionInfo }) {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
               <img
-                src="https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/0d720b5a0_MFALogo6.png"
+                src="/ghana-crest.png"
                 alt="Ministry of Foreign Affairs - Republic of Ghana"
                 className="h-24 w-auto object-contain"
               />
