@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Calendar } from 'lucide-react';
 
-const slides = [
+const MOCK_SLIDES = [
   {
     date: 'March 26, 2026',
     title: 'History Made at the United Nations',
@@ -24,14 +24,18 @@ const slides = [
 ];
 
 export default function HeroSection() {
+  const [slides, setSlides] = useState(MOCK_SLIDES);
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 7000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
+
+  if (slides.length === 0) return null;
 
   const slide = slides[current];
 

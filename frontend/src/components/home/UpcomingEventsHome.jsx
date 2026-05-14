@@ -2,14 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarDays, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+
+const MOCK_EVENTS = [
+  {
+    id: 'e1',
+    type: 'Cultural',
+    title: 'Ghana Independence Day Celebration 2026',
+    date: '2026-03-06',
+    location: 'Lansdowne Park, Ottawa',
+    poster_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80'
+  },
+  {
+    id: 'e2',
+    type: 'Diplomatic',
+    title: 'Bilateral Trade Forum: Ghana & Canada',
+    date: '2026-04-15',
+    location: 'Westin Hotel, Ottawa',
+    poster_url: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&q=80'
+  },
+  {
+    id: 'e3',
+    type: 'Community',
+    title: 'Consular Outreach Programme - Toronto',
+    date: '2026-05-20',
+    location: 'Ghanaian Presbyterian Church, Toronto',
+    poster_url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&q=80'
+  }
+];
 
 export default function UpcomingEventsHome() {
-  const [events, setEvents] = useState([]);
-
-  useEffect(() => {
-    base44.entities.DiploEvent.filter({ status: 'Confirmed' }, '-date', 6).then(setEvents).catch(() => {});
-  }, []);
+  const [events, setEvents] = useState(MOCK_EVENTS);
 
   return (
     <section className="bg-muted/50 py-20">
@@ -60,7 +82,7 @@ export default function UpcomingEventsHome() {
               </div>
               <h3 className="font-heading text-lg font-semibold text-foreground mb-2">No upcoming events yet</h3>
               <p className="text-muted-foreground text-sm mb-6">
-                Events from the admin panel will appear here automatically.
+                Events will appear here automatically.
               </p>
             </div>
           </motion.div>

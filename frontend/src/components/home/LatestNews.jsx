@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
 
 const CREST_IMAGE = 'https://media.base44.com/images/public/69f9dccd37db37f01bbbc815/0d720b5a0_MFALogo6.png';
 
 function isValidImageUrl(url) {
   if (!url || typeof url !== 'string') return false;
+  // If the url is a relative media path from Django, consider it valid
+  if (url.startsWith('/media/')) return true;
   try {
     const parsed = new URL(url);
     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
@@ -21,16 +22,23 @@ export default function LatestNews() {
   const [failedImages, setFailedImages] = useState({});
 
   useEffect(() => {
-    base44.entities.NewsArticle.filter({ status: 'Published' }, '-published_date', 3)
-      .then(articles => {
-        setNewsItems(articles.map(a => ({
+    fetch('/api/news/')
+      .then(res => res.json())
+      .then(data => {
+        // DRF might return paginated data (data.results) or a flat array
+        const articles = Array.isArray(data) ? data : (data.results || []);
+        
+        // Take up to 3 published articles
+        const published = articles.filter(a => a.status === 'Published').slice(0, 3);
+        
+        setNewsItems(published.map(a => ({
           date: a.published_date,
           title: a.title,
-          image: a.image_url,
+          image: a.image,
           slug: a.slug || a.id,
         })));
       })
-      .catch(() => {});
+      .catch(err => console.error('Error fetching news:', err));
   }, []);
 
   const markImageAsFailed = (slug) => {
