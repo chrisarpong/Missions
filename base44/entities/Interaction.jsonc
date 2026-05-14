@@ -1,0 +1,58 @@
+{
+  "name": "Interaction",
+  "type": "object",
+  "properties": {
+    "contact_id": {
+      "type": "string",
+      "description": "Reference to Contact"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Meeting",
+        "Call",
+        "Email",
+        "Diplomatic Note",
+        "Event",
+        "Other"
+      ],
+      "default": "Meeting"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "Positive",
+        "Neutral",
+        "Negative",
+        "Follow-up Required"
+      ],
+      "default": "Neutral"
+    },
+    "follow_up_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "follow_up_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contact_id",
+    "subject",
+    "date",
+    "type"
+  ]
+}

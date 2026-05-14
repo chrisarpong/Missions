@@ -1,0 +1,42 @@
+{
+  "name": "Media",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "File name"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL to the uploaded file"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video",
+        "document"
+      ],
+      "default": "image"
+    },
+    "size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for organizing media"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of the media"
+    }
+  },
+  "required": [
+    "name",
+    "file_url"
+  ]
+}
